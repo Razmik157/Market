@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Techno Lab | Pro Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #10b981;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --light: #0f172a;
+            --dark: #f8fafc;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --gray: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.3s, border 0.3s; }
+        body { background: var(--light); color: var(--dark); overflow-x: hidden; }
+
+        header {
+            background: var(--card-bg); padding: 15px 5%; display: flex; justify-content: space-between; 
+            align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+        .logo { font-size: 24px; font-weight: 800; color: var(--primary); text-decoration: none; cursor: pointer; }
+        
+        .nav-links { display: flex; gap: 20px; align-items: center; margin-left: 20px; }
+        .about-link { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--gray); transition: 0.2s; }
+        .about-link:hover { color: var(--primary); }
+
+        .search-bar { flex: 1; margin: 0 40px; position: relative; max-width: 500px; }
+        .search-bar input { 
+            width: 100%; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border-color); 
+            outline: none; background: var(--light); color: var(--dark); transition: 0.3s;
+        }
+
+        .nav-icons { display: flex; gap: 20px; align-items: center; }
+        .cart-icon { position: relative; cursor: pointer; font-size: 20px; }
+        #cartCount { 
+            position: absolute; top: -8px; right: -8px; background: var(--primary); 
+            color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; 
+        }
+
+        .user-badge { background: var(--border-color); padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--dark); }
+
+        .categories { background: var(--card-bg); padding: 10px 5%; display: flex; gap: 15px; border-bottom: 1px solid var(--border-color); overflow-x: auto; scrollbar-width: none; }
+        .cat-btn { 
+            padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); 
+            background: var(--card-bg); color: var(--dark); cursor: pointer; white-space: nowrap; transition: 0.2s;
+        }
+        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+
+        .main-container { max-width: 1300px; margin: 30px auto; padding: 0 20px; display: flex; gap: 30px; }
+        
+        .filters { width: 250px; flex-shrink: 0; }
+        .filter-box { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        .filter-box h4 { margin-bottom: 15px; font-size: 12px; text-transform: uppercase; color: var(--gray); }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; flex-grow: 1; }
+        .product-card { 
+            background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; display: flex; flex-direction: column; cursor: pointer;
+        }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .product-card img { width: 100%; height: 180px; object-fit: cover; }
+        .p-body { padding: 15px; flex-grow: 1; }
+        .p-price { font-size: 18px; font-weight: 800; color: var(--primary); }
+
+        .btn-action { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .btn-buy { background: var(--primary); color: white; }
+
+        #productDetailView { display: none; background: var(--card-bg); padding: 40px; border-radius: 24px; margin-bottom: 30px; border: 1px solid var(--border-color); animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .detail-container { display: flex; gap: 40px; flex-wrap: wrap; }
+        .detail-img { width: 450px; max-width: 100%; border-radius: 20px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .detail-info { flex: 1; min-width: 300px; }
+
+        .theme-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 24px; width: 350px; text-align: center; color: var(--dark); border: 1px solid var(--border-color); }
+        .modal-content input, .modal-content select, .modal-content textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 12px; background: var(--light); color: var(--dark); }
+
+        #cartSidebar {
+            position: fixed; right: -400px; top: 0; width: 350px; height: 100%; 
+            background: var(--card-bg); z-index: 200; box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px; display: flex; flex-direction: column; color: var(--dark);
+        }
+        #cartSidebar.open { right: 0; }
+
+        .chat-container { width: 500px; max-width: 95%; height: 80vh; display: flex; flex-direction: column; text-align: left; }
+        #chatMessages { flex-grow: 1; overflow-y: auto; background: var(--light); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .msg-bubble { margin-bottom: 10px; padding: 10px; border-radius: 12px; max-width: 85%; font-size: 14px; position: relative; }
+        .msg-user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg-admin { background: #e2e8f0; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #cbd5e1; }
+
+        .admin-card { background: var(--light); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--primary); font-size: 13px; }
+        
+        .admin-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .admin-nav-btn { padding: 8px 15px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--dark); cursor: pointer; font-weight: 600; font-size: 12px; }
+        .admin-nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+
+        .status-badge { padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-process { background: #dcfce7; color: #166534; }
+    </style>
+</head>
+<body data-theme="light">
+
+<header>
+    <div style="display: flex; align-items: center;">
+        <a href="#" class="logo" onclick="location.reload()">⚙️ TECHNO LAB</a>
+        <nav class="nav-links">
+            <span class="about-link" onclick="openAboutModal()">Մեր մասին</span>
+            <span class="about-link" onclick="openChat()" style="color: var(--primary); font-weight: 800;">💬 Զրուցարան</span>
+            <span class="about-link" onclick="openMyOrders()" style="color: var(--secondary); font-weight: 800;">📦 Իմ Պատվերները</span>
+        </nav>
+    </div>
+    <div class="search-bar"><input type="text" id="searchInput" placeholder="Որոնել..." oninput="applyFilters()"></div>
+    <div class="nav-icons">
+        <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+        <div id="userSection" onclick="openAuthModal()"><span class="user-badge" id="userNameDisplay">Մուտք / Գրանցում</span></div>
+        <div class="cart-icon" onclick="toggleCart(true)">🛒 <span id="cartCount">0</span></div>
+        <div id="staffStatus" style="display:none; font-size: 11px; color: var(--secondary); font-weight: 800; border: 1px solid; padding: 2px 5px; border-radius: 5px;">ADMIN</div>
+    </div>
+</header>
+
+<!-- Orders Modal -->
+<div id="ordersModal" class="modal">
+    <div class="modal-content" style="width: 450px; text-align: left;">
+        <h2 style="margin-bottom: 15px; color: var(--primary);">Իմ Պատվերները</h2>
+        <div id="myOrdersList" style="max-height: 400px; overflow-y: auto;"></div>
+        <button class="btn-action btn-buy" onclick="document.getElementById('ordersModal').style.display='none'">Փակել</button>
+    </div>
+</div>
+
+<!-- Chat Modal -->
+<div id="chatModal" class="modal">
+    <div class="modal-content chat-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: var(--primary);">Techno Lab Օնլայն Չատ</h2>
+            <button onclick="closeChat()" style="border:none; background:none; font-size: 24px; cursor:pointer; color: var(--dark);">&times;</button>
+        </div>
+        <div id="chatMessages"></div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 5px;">
+                <input type="email" id="chatEmail" placeholder="Էլ. փոստ" style="flex: 2; margin:0;">
+                <input type="password" id="chatPin" placeholder="PIN" maxlength="4" style="flex: 1; margin:0;">
+                <button class="btn-buy" onclick="loadMyMessages()" style="padding: 0 10px; border-radius: 12px; border:none; cursor:pointer; font-size: 12px;">Ստուգել</button>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="chatInput" placeholder="Գրեք հաղորդագրություն..." style="flex: 1; margin:0;">
+                <button class="btn-buy" onclick="sendMessage()" style="padding: 0 15px; border-radius: 12px; border:none; cursor:pointer;">Ուղարկել</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- About Modal -->
+<div id="aboutModal" class="modal">
+    <div class="modal-content" style="text-align: left; width: 500px;">
+        <h2 style="color: var(--primary);">Մեր մասին</h2>
+        <p style="margin-top: 15px; line-height: 1.6; color: var(--gray);">Բարի գալուստ <b>Techno Lab</b>: Մենք առաջատար լաբորատորիա ենք...</p>
+        <button class="btn-action btn-buy" onclick="closeAboutModal()">Փակել</button>
+    </div>
+</div>
+
+<!-- ════ ADMIN LOGIN MODAL (նոր) ════ -->
+<div id="adminLoginModal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 20px; color: var(--primary);">Admin Մուտք</h2>
+        <input type="password" id="adminPasswordInput" placeholder="Admin Գաղտնաբառ">
+        <div id="adminLoginError" style="color: #f43f5e; font-size: 13px; min-height: 20px;"></div>
+        <button class="btn-action btn-buy" onclick="handleAdminLogin()">Մուտք</button>
+        <button onclick="document.getElementById('adminLoginModal').style.display='none'" 
+                style="margin-top:10px; cursor:pointer; border:none; background:none; color:var(--gray);">Փակել</button>
+    </div>
+</div>
+
+<!-- Categories -->
+<div class="categories" id="catBar">
+    <button class="cat-btn active" onclick="filterCat('All', this)">Բոլորը</button>
+    <button class="cat-btn" onclick="filterCat('3D Printing', this)">3D Տպագրութիւն</button>
+    <button class="cat-btn" onclick="filterCat('CNC Metal', this)">CNC Մետաղ</button>
+    <button class="cat-btn" onclick="filterCat('Laser Cut', this)">Լազերային կտրում</button>
+</div>
+
+<div class="main-container">
+    <aside class="filters" id="sidebarFilters">
+        <div class="filter-box">
+            <h4>Առաւելագոյն Գին: <span id="priceVal">100,000</span> ֏</h4>
+            <input type="range" id="priceRange" min="0" max="1000000" step="1000" value="1000000" style="width: 100%; cursor: pointer;" oninput="applyFilters()">
+        </div>
+    </aside>
+
+    <section style="flex-grow: 1;">
+        <div id="productDetailView">
+            <button onclick="closeDetail()" style="margin-bottom: 20px; cursor: pointer; color: var(--primary); background:none; border:none; font-weight:800;">← Վերադառնալ</button>
+            <div id="detailContent" class="detail-container"></div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminArea" style="display: none; background: var(--card-bg); padding: 25px; border-radius: 20px; margin-bottom: 25px; border: 1px solid var(--primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Ադմին Պանել</h2>
+                <button onclick="adminLogout()" style="color: #f43f5e; background: none; border: none; cursor: pointer; font-weight: 700;">Դուրս գալ</button>
+            </div>
+            <div class="admin-nav">
+                <button class="admin-nav-btn active" onclick="switchAdminTab('addProduct', event)">➕ Ապրանք</button>
+                <button class="admin-nav-btn" onclick="switchAdminTab('viewOrders', event)">📦 Պատվերներ</button>
+                <button class="admin-nav-btn" onclick="switchAdminTab('viewMessages', event)">📩 Նամակներ</button>
+            </div>
+            <div id="admin-addProduct" class="admin-section active">
+                <input type="text" id="addTitle" placeholder="Ապրանքի Անուն" style="width:100%; margin-bottom:10px; padding:10px; border-radius:12px; border:1px solid var(--border-color);">
+                <input type="number" id="addPrice" placeholder="Գին" style="width:100%; margin-bottom:10px; padding:10px; border-radius:12px; border:1px solid var(--border-color);">
+                <select id="addCategory" style="width:100%; margin-bottom:10px; padding:10px; border-radius:12px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--dark);">
+                    <option value="3D Printing">3D Տպագրութիւն</option>
+                    <option value="CNC Metal">CNC Մետաղ</option>
+                    <option value="Laser Cut">Լազերային կտրում</option>
+                </select>
+                <textarea id="addDesc" placeholder="Ապրանքի նկարագրություն..." style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 12px; border: 1px solid var(--border-color); background:var(--card-bg); color:var(--dark);"></textarea>
+                <input type="file" id="addImage" accept="image/*" style="margin-bottom:10px;">
+                <button class="btn-action btn-buy" onclick="addNewProduct()">+ Հրապարակել</button>
+            </div>
+            <div id="admin-viewOrders" class="admin-section">
+                <div id="adminOrdersList"></div>
+            </div>
+            <div id="admin-viewMessages" class="admin-section">
+                <div id="adminMessagesList"></div>
+            </div>
+            <button class="btn-action" style="width: auto; margin-top: 15px; background: var(--border-color); color: var(--dark); padding: 8px 15px;" onclick="loadAdminData()">🔄 Թարմացնել</button>
+        </div>
+
+        <div class="products-grid" id="productGrid"></div>
+    </section>
+</div>
+
+<!-- Auth Modal -->
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button style="flex:1; padding:10px; cursor:pointer; border-radius:10px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--dark);" onclick="switchAuth('login')">Մուտք</button>
+            <button style="flex:1; padding:10px; cursor:pointer; border-radius:10px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--dark);" onclick="switchAuth('reg')">Գրանցում</button>
+        </div>
+        <input type="email" id="loginEmail" placeholder="Էլ. Փոստ">
+        <input type="text" id="loginName" placeholder="Անուն" style="display:none;">
+        <input type="password" id="loginPin" placeholder="PIN (4 թիվ)" maxlength="4">
+        <button class="btn-action btn-buy" onclick="handleAuth()">Հաստատել</button>
+        <button onclick="closeModal()" style="margin-top:10px; cursor:pointer; border:none; background:none; color:var(--gray);">Փակել</button>
+    </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div id="cartSidebar">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Զամբիւղ</h2><button onclick="toggleCart(false)" style="border:none; background:none; font-size: 24px; cursor:pointer;">&times;</button>
+    </div>
+    <div id="cartItems" style="flex-grow: 1; overflow-y: auto;"></div>
+    <div style="padding-top: 20px; border-top: 1px solid var(--border-color);">
+        <div style="display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 15px;">
+            <span>Ընդհանուր՝</span><span id="cartTotal">0 ֏</span>
+        </div>
+        <button class="btn-action btn-buy" onclick="processCheckout()">Հաստատել</button>
+    </div>
+</div>
+
+<script>
+    // ════════════════════════════════════════
+    // CONFIG — ✅ token-ը հեռացված է
+    // ════════════════════════════════════════
+    const API_URL = "http://localhost:3000";
+
+    let products = [];
+    let cart = [];
+    let currentCategory = 'All';
+    let currentAuthMode = 'login';
+    let isAdmin = false; // server session-ից կստուգվի
+
+    // ════════════════════════════════════════
+    // UTILS
+    // ════════════════════════════════════════
+    function toggleTheme() { document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark'; }
+    function openAboutModal() { document.getElementById('aboutModal').style.display = 'flex'; }
+    function closeAboutModal() { document.getElementById('aboutModal').style.display = 'none'; }
+    function closeModal() { document.getElementById('authModal').style.display = 'none'; }
+    function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
+    function toggleCart(st) { document.getElementById('cartSidebar').classList.toggle('open', st); }
+    function openChat() { document.getElementById('chatModal').style.display = 'flex'; }
+    function closeChat() { document.getElementById('chatModal').style.display = 'none'; }
+
+    function switchAuth(mode) {
+        currentAuthMode = mode;
+        document.getElementById('loginName').style.display = mode === 'reg' ? 'block' : 'none';
+        document.getElementById('loginPin').placeholder = mode === 'reg' ? 'PIN (4 թիվ, ուղարկվի Ձեզ)' : 'PIN (4 թիվ)';
+    }
+
+    function switchAdminTab(tabId, event) {
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('admin-' + tabId).classList.add('active');
+        if (event) event.currentTarget.classList.add('active');
+    }
+
+    // ════════════════════════════════════════
+    // DATA LOAD
+    // ════════════════════════════════════════
+    async function loadData() {
+        try {
+            const res = await fetch(`${API_URL}/products`);
+            products = await res.json();
+            applyFilters();
+        } catch (e) { console.error("API Error:", e); }
+        checkUserStatus();
+        await checkAdminSession();
+    }
+
+    // ════════════════════════════════════════
+    // ADMIN SESSION CHECK (server-side)
+    // ════════════════════════════════════════
+    async function checkAdminSession() {
+        try {
+            const res = await fetch(`${API_URL}/admin/check`, { credentials: 'include' });
+            const data = await res.json();
+            isAdmin = data.isAdmin;
+            if (isAdmin) {
+                document.getElementById('adminArea').style.display = 'block';
+                document.getElementById('staffStatus').style.display = 'block';
+                loadAdminData();
+            }
+        } catch (e) { isAdmin = false; }
+    }
+
+    // ════════════════════════════════════════
+    // ADMIN LOGIN MODAL
+    // ════════════════════════════════════════
+    async function handleAdminLogin() {
+        const password = document.getElementById('adminPasswordInput').value;
+        const errEl = document.getElementById('adminLoginError');
+        errEl.innerText = '';
+
+        try {
+            const res = await fetch(`${API_URL}/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // session cookie-ի համար կարևոր է
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('adminLoginModal').style.display = 'none';
+                document.getElementById('adminPasswordInput').value = '';
+                location.reload();
+            } else {
+                errEl.innerText = data.error || "Սխալ գաղտնաբառ";
+            }
+        } catch (e) {
+            errEl.innerText = "Կապի խնդիր";
+        }
+    }
+
+    async function adminLogout() {
+        await fetch(`${API_URL}/admin/logout`, { method: 'POST', credentials: 'include' });
+        location.reload();
+    }
+
+    // ════════════════════════════════════════
+    // PRODUCTS
+    // ════════════════════════════════════════
+    function applyFilters() {
+        const maxPrice = document.getElementById('priceRange').value;
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        document.getElementById('priceVal').innerText = parseInt(maxPrice).toLocaleString();
+        
+        let filtered = products.filter(p => 
+            (currentCategory === 'All' || p.cat === currentCategory) && 
+            (p.price <= maxPrice) &&
+            (p.title.toLowerCase().includes(search))
+        );
+
+        document.getElementById('productGrid').innerHTML = filtered.map(p => `
+            <div class="product-card" onclick="openDetail(${p.id})">
+                ${isAdmin ? `<button onclick="event.stopPropagation(); deleteProduct(${p.id})" 
+                    style="position:absolute; top:10px; right:10px; background:#f43f5e; color:white; 
+                    border-radius:50%; width:25px; height:25px; border:none; z-index:10; cursor:pointer;">×</button>` : ''}
+                <img src="${p.img || 'https://via.placeholder.com/400'}" alt="${p.title}">
+                <div class="p-body">
+                    <span style="font-size:10px; color:var(--primary); font-weight:800;">${p.cat}</span>
+                    <h3>${p.title}</h3>
+                    <div class="p-price">${p.price.toLocaleString()} ֏</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function openDetail(id) {
+        const p = products.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('productGrid').style.display = 'none';
+        document.getElementById('sidebarFilters').style.display = 'none';
+        document.getElementById('catBar').style.display = 'none';
+        const dv = document.getElementById('productDetailView');
+        dv.style.display = 'block';
+        document.getElementById('detailContent').innerHTML = `
+            <img src="${p.img}" class="detail-img" alt="${p.title}">
+            <div class="detail-info">
+                <h1>${p.title}</h1>
+                <p style="margin:20px 0; color:var(--gray);">${p.desc || 'Լաբորատոր արտադրանք'}</p>
+                <div style="font-size:24px; font-weight:800; color:var(--primary);">${p.price.toLocaleString()} ֏</div>
+                <button class="btn-action btn-buy" onclick="addToCart(${p.id})">🛒 Աւելացնել զամբիւղ</button>
+            </div>`;
+    }
+
+    function closeDetail() {
+        document.getElementById('productDetailView').style.display = 'none';
+        document.getElementById('productGrid').style.display = 'grid';
+        document.getElementById('sidebarFilters').style.display = 'block';
+        document.getElementById('catBar').style.display = 'flex';
+    }
+
+    function filterCat(cat, btn) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        closeDetail(); applyFilters();
+    }
+
+    // ════════════════════════════════════════
+    // CLIENT AUTH
+    // ════════════════════════════════════════
+    async function handleAuth() {
+        const email = document.getElementById('loginEmail').value;
+        const pin = document.getElementById('loginPin').value;
+        const name = document.getElementById('loginName').value;
+
+        if (currentAuthMode === 'reg') {
+            if (!name || !email) return alert("Բոլոր դաշտերը պարտադիր են");
+            const res = await fetch(`${API_URL}/register-client`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, email })
+            });
+            const data = await res.json();
+            if (data.success) {
+                // PIN-ը ցույց տալ, հետո մաքրել հիշողությունից
+                alert(`✅ Գրանցումը հաջողվեց!\n\nՁեր PIN կոդն է՝ ${data.pin}\n\n⚠️ Պահեք այն — հետ ցույց չի տրվի!`);
+                location.reload();
+            } else {
+                alert(data.message || data.error || "Սխալ գրանցման ժամանակ");
+            }
+        } else {
+            if (!email || !pin) return alert("Բոլոր դաշտերը պարտադիր են");
+            const res = await fetch(`${API_URL}/login-client`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, pin })
+            });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem("userName", data.name);
+                localStorage.setItem("userEmail", email);
+                localStorage.setItem("userPin", pin);
+                location.reload();
+            } else {
+                alert(data.message || "Սխալ տվյալներ");
+            }
+        }
+    }
+
+    // ════════════════════════════════════════
+    // ORDERS
+    // ════════════════════════════════════════
+    async function openMyOrders() {
+        const email = localStorage.getItem("userEmail");
+        const pin = localStorage.getItem("userPin");
+        if (!email) return openAuthModal();
+        
+        const res = await fetch(`${API_URL}/my-orders/${encodeURIComponent(email)}?pin=${encodeURIComponent(pin)}`);
+        if (!res.ok) { alert("Սխալ PIN կամ auth"); return; }
+        const orders = await res.json();
+        document.getElementById('myOrdersList').innerHTML = orders.reverse().map(o => `
+            <div style="border:1px solid #ddd; padding:10px; border-radius:10px; margin-bottom:10px;">
+                <b>#${o.id}</b> | <span class="status-badge status-pending">${o.status}</span><br>
+                ${o.total.toLocaleString()} ֏
+            </div>
+        `).join('') || "<p style='color:var(--gray)'>Պատվերներ չկան</p>";
+        document.getElementById('ordersModal').style.display = 'flex';
+    }
+
+    // ════════════════════════════════════════
+    // CHAT
+    // ════════════════════════════════════════
+    async function loadMyMessages() {
+        const email = document.getElementById('chatEmail').value;
+        const pin = document.getElementById('chatPin').value;
+        if (!email || !pin) return;
+        const res = await fetch(`${API_URL}/my-messages/${encodeURIComponent(email)}?pin=${encodeURIComponent(pin)}`);
+        if (res.ok) {
+            const msgs = await res.json();
+            document.getElementById('chatMessages').innerHTML = msgs.map(m => `
+                <div class="msg-bubble msg-user">${m.message}</div>
+                ${m.reply ? `<div class="msg-bubble msg-admin">💬 ${m.reply}</div>` : ''}
+            `).join('') || '<p style="color:var(--gray); font-size:13px;">Հաղորդագրություններ չկան</p>';
+        } else {
+            alert("Սխալ PIN կամ email");
+        }
+    }
+
+    async function sendMessage() {
+        const email = document.getElementById('chatEmail').value;
+        const pin = document.getElementById('chatPin').value;
+        const msg = document.getElementById('chatInput').value;
+        if (!email || !pin || !msg) return alert("Լրացրեք բոլոր դաշտերը");
+        
+        const res = await fetch(`${API_URL}/messages`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email, pin, message: msg, name: localStorage.getItem("userName") || "User" })
+        });
+        if (res.ok) {
+            document.getElementById('chatInput').value = "";
+            loadMyMessages();
+        } else {
+            alert("Սխալ auth. Ստուգեք email/PIN");
+        }
+    }
+
+    // ════════════════════════════════════════
+    // CART
+    // ════════════════════════════════════════
+    function addToCart(id) {
+        const p = products.find(x => x.id === id);
+        if (!p) return;
+        cart.push(p);
+        updateCartUI();
+        toggleCart(true);
+    }
+
+    function updateCartUI() {
+        document.getElementById('cartCount').innerText = cart.length;
+        document.getElementById('cartItems').innerHTML = cart.map((x, i) => `
+            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-color);">
+                <span>${x.title}</span>
+                <button onclick="cart.splice(${i},1); updateCartUI();" style="border:none; color:red; background:none; cursor:pointer; font-size:18px;">×</button>
+            </div>`).join('');
+        document.getElementById('cartTotal').innerText = cart.reduce((s, i) => s + i.price, 0).toLocaleString() + " ֏";
+    }
+
+    async function processCheckout() {
+        const name = localStorage.getItem("userName");
+        const email = localStorage.getItem("userEmail");
+        const pin = localStorage.getItem("userPin");
+        if (!name || !email) return openAuthModal();
+        if (cart.length === 0) return alert("Զամբիւղը դատարկ է");
+
+        const order = {
+            customer: name, email, pin,
+            items: cart,
+            total: cart.reduce((s, i) => s + i.price, 0)
+        };
+        const res = await fetch(`${API_URL}/orders`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(order)
+        });
+        if (res.ok) {
+            alert("✅ Պատվերը հաստատված է");
+            cart = []; updateCartUI(); toggleCart(false);
+        } else {
+            alert("Սխալ. Ստուգեք auth");
+        }
+    }
+
+    // ════════════════════════════════════════
+    // ADMIN PANEL
+    // ════════════════════════════════════════
+    async function loadAdminData() {
+        // ✅ Token չկա — credentials: 'include' session cookie-ն ուղարկում է
+        const resOrders = await fetch(`${API_URL}/admin/orders`, { credentials: 'include' });
+        if (!resOrders.ok) return;
+        const orders = await resOrders.json();
+        document.getElementById('adminOrdersList').innerHTML = orders.reverse().map(o => `
+            <div class="admin-card">
+                <b>${o.customer}</b> (${o.email}) — ${o.total.toLocaleString()} ֏
+                <p>Status: <b>${o.status}</b></p>
+                <p style="font-size:11px; color:var(--gray);">${o.date}</p>
+            </div>
+        `).join('') || "Պատվերներ չկան";
+
+        const resMsgs = await fetch(`${API_URL}/admin/messages`, { credentials: 'include' });
+        if (!resMsgs.ok) return;
+        const msgs = await resMsgs.json();
+        document.getElementById('adminMessagesList').innerHTML = msgs.reverse().map(m => `
+            <div class="admin-card">
+                <b>${m.name}</b> (${m.email})<br>
+                <p>${m.message}</p>
+                ${m.reply ? `<p style="color:var(--secondary);">✅ ${m.reply}</p>` : ''}
+            </div>
+        `).join('') || "Հաղորդագրություններ չկան";
+    }
+
+    async function addNewProduct() {
+        const title = document.getElementById('addTitle').value;
+        const price = document.getElementById('addPrice').value;
+        const cat = document.getElementById('addCategory').value;
+        const desc = document.getElementById('addDesc').value;
+        const imgFile = document.getElementById('addImage').files[0];
+        
+        if (!title || !price || !imgFile) return alert("Լրացրեք բոլոր դաշտերը");
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const res = await fetch(`${API_URL}/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // ✅ Token չկա, session cookie
+                body: JSON.stringify({ title, price: parseInt(price), cat, desc, img: reader.result })
+            });
+            if (res.ok) {
+                location.reload();
+            } else {
+                alert("Սխալ։ Համոզվեք որ admin եք");
+            }
+        };
+        reader.readAsDataURL(imgFile);
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm("Ջնջե՞լ")) return;
+        const res = await fetch(`${API_URL}/products/${id}`, { 
+            method: 'DELETE',
+            credentials: 'include' // ✅ Token չկա
+        });
+        if (res.ok) loadData();
+        else alert("Սխալ ջնջելիս");
+    }
+
+    // ════════════════════════════════════════
+    // USER STATUS
+    // ════════════════════════════════════════
+    function checkUserStatus() {
+        const n = localStorage.getItem("userName");
+        if (n) document.getElementById('userNameDisplay').innerText = "👋 " + n;
+    }
+
+    function logout() { localStorage.clear(); location.reload(); }
+
+    // ════════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════════
+    window.onload = () => {
+        // ✅ Admin route՝ URL hash-ով չէ — modal-ով
+        if (location.hash === "#admin") {
+            document.getElementById('adminLoginModal').style.display = 'flex';
+            history.replaceState(null, '', location.pathname); // hash-ը հեռացնել URL-ից
+        }
+        loadData();
+    };
+</script>
+</body>
+</html>
